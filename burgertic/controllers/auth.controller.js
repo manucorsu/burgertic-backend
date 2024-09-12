@@ -3,11 +3,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const register = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
-
+  // --------------- COMPLETAR ---------------
+  /*
+ 
         Recordar que para cumplir con toda la funcionalidad deben:
-
+ 
             1. Verificar que el body de la request tenga el campo usuario
             2. Verificar que el campo usuario tenga los campos nombre, apellido, email y password
             3. Verificar que no exista un usuario con el mismo email (utilizando el servicio de usuario)
@@ -16,16 +16,33 @@ const register = async (req, res) => {
             6. Guardar el usuario en la base de datos (utilizando el servicio de usuario)
             7. Devolver un mensaje de éxito si todo salió bien (status 201)
             8. Devolver un mensaje de error si algo falló guardando al usuario (status 500)
-        
     */
-};
+  let usuario = req.body;
+  if (!usuario) {
+    return res.status(400).json({ message: "Se debe enviar un usuario." });
+  }
+  else if (!usuario.nombre || !usuario.apellido || !usuario.email || !usuario.password) {
+    return res.status(400).json({ message: "El usuario tiene campos incompletos." });
+  }
+  else if (UsuariosService.getUsuarioByEmail(usuario.email) === null) {
+    res.status(400).json({ message: "Ya existe un usuario con ese email." });
+  }
+  else if (usuario.nombre.length > 60 || usuario.apellido.length > 60 || usuario.email.length > 60) {
+    return res.status(400).json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." });
+  }
+  else {
+      usuario.password = await bcrypt.hash(usuario.password, 10);
+      await UsuariosService.createUsuario(usuario);
+      res.status(201).json({ message: "Usuario creado con éxito." });
+    }
+  };
 
 const login = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
-
+  // --------------- COMPLETAR ---------------
+  /*
+ 
         Recordar que para cumplir con toda la funcionalidad deben:
-
+ 
             1. Verificar que el body de la request tenga el campo email y password
             2. Buscar un usuario con el email recibido
             3. Verificar que el usuario exista

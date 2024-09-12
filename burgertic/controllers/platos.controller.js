@@ -35,7 +35,7 @@ const createPlato = async (req, res) => {
 
     try {
         await PlatosService.createPlato(plato);
-        res.json({ message: "Plato creado con éxito" });
+        res.status(201).json({ message: "Plato creado con éxito" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
