@@ -17,25 +17,31 @@ const register = async (req, res) => {
             7. Devolver un mensaje de éxito si todo salió bien (status 201)
             8. Devolver un mensaje de error si algo falló guardando al usuario (status 500)
     */
-  let usuario = req.body;
+  const usuario = req.body;
   if (!usuario) {
-    return res.status(400).json({ message: "Se debe enviar un usuario." });
+    return res.status(400).json({ message: "No se envió un usuario." });
   }
-  else if (!usuario.nombre || !usuario.apellido || !usuario.email || !usuario.password) {
-    return res.status(400).json({ message: "El usuario tiene campos incompletos." });
+  if (!usuario.nombre || !usuario.apellido || !usuario.email || !usuario.password) {
+    return res.status(400).json({ message: "El usuario tiene datos incompletos." });
   }
-  else if (UsuariosService.getUsuarioByEmail(usuario.email) === null) {
-    res.status(400).json({ message: "Ya existe un usuario con ese email." });
-  }
-  else if (usuario.nombre.length > 60 || usuario.apellido.length > 60 || usuario.email.length > 60) {
-    return res.status(400).json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." });
+  if (usuario.nombre.length > 60 || usuario.apellido.length > 60 || usuario.email.length > 255) {
+    return res.status(400).json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." })
+  } // no lo pide la consigna pero notamos que en pgadmin aparece que estos campos son character varying(60/60/255) respectivamente
+  if ((await UsuariosService.getUsuarioByEmail(usuario.email)) === null) {
+    try {
+      const hashedPwd = await bcrypt.hash(usuario.password, 10);
+      usuario.password = hashedPwd;
+      await UsuariosService.createUsuario(usuario);
+      res.status(201).json({ message: "Usuario registrado con éxito." })
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ message: error.message })
+    }
   }
   else {
-      usuario.password = await bcrypt.hash(usuario.password, 10);
-      await UsuariosService.createUsuario(usuario);
-      res.status(201).json({ message: "Usuario creado con éxito." });
-    }
-  };
+    return res.status(400).json({ message: "Ya existe un usuario con ese mail." })
+  }
+}
 
 const login = async (req, res) => {
   // --------------- COMPLETAR ---------------
