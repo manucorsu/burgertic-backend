@@ -14,7 +14,6 @@ const getUsuarioByEmail = async (email) => {
         if (rows.length < 1) return null;
         else return rows[0]
     } catch (error) {
-        console.warn(email);
         await client.end();
         throw error;
     }

@@ -59,6 +59,25 @@ const login = async (req, res) => {
             8. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const usuario = req.body;
+  if (!usuario) return res.status(400).json({ message: "No se envió un usuario." });
+  if (!usuario.email || !usuario.password) {
+    return res.status(400).json({ message: "El usuario tiene datos incompletos." });
+  }
+  const usuarioDb = await UsuariosService.getUsuarioByEmail(usuario.email);
+  if (usuarioDb === null) {
+    return res.status(400).json({ message: "No hay un usuario registrado con ese email." });
+  }
+  else {
+    const matches = await bcrypt.compare(usuario.password, usuarioDb.password);
+    if (matches) {
+      const token = jwt.sign({ id: usuarioDb.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
+      return res.status(200).json({ "email": usuario.email, "nombre": usuarioDb.nombre, "apellido": usuarioDb.apellido, "token": token });
+    }
+    else {
+      return res.status(400).json({ message: "Usuario o contraseña incorrecta." });
+    }
+  }
 };
 
 export default { register, login };
