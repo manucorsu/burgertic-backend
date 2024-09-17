@@ -18,7 +18,8 @@ export const verifyToken = async (req, res, next) => {
     if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
     if (authorization.slice(0, 7) !== "Bearer ") return res.status(401).json({ message: "El token no es válido." });
     else try {
-        const payload = await jwt.verify(authorization, process.env.JWT_SECRET);
+        const token = req.headers.authorization.slice(7);
+        const payload = await jwt.verify(token, process.env.JWT_SECRET);
         if (!payload.id) return res.status(401).json({ message: "El token no es válido." });
         else {
             req.id = payload.id;
@@ -51,6 +52,7 @@ export const verifyAdmin = async (req, res, next) => {
             next();
         }
     } catch (error) {
+        console.log(error.message);
         res.status(401).json({ message: error.message })
     }
 

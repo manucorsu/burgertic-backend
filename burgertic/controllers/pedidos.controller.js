@@ -10,6 +10,12 @@ const getPedidos = async (req, res) => {
             3. Devolver un mensaje de error si algo falló (status 500)
         
     */
+    try {
+        const pedidos = await PedidosService.getPedidos();
+        res.status(200).json(pedidos);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const getPedidosByUser = async (req, res) => {
