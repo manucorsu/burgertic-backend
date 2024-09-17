@@ -14,6 +14,19 @@ export const verifyToken = async (req, res, next) => {
     
         Recordar también que si sucede cualquier error en este proceso, deben devolver un error 401 (Unauthorized)
     */
+    const authorization = req.headers.authorization;
+    if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
+    if (authorization.slice(0, 7) !== "Bearer ") return res.status(401).json({ message: "El token no es válido." });
+    else try {
+        const payload = await jwt.verify(authorization, process.env.JWT_SECRET);
+        if (!payload.id) return res.status(401).json({ message: "El token no es válido." });
+        else {
+            req.id = payload.id;
+            next();
+        }
+    } catch (error) {
+        res.status(401).json({ message: error.message })
+    }
 };
 
 export const verifyAdmin = async (req, res, next) => {
@@ -26,4 +39,19 @@ export const verifyAdmin = async (req, res, next) => {
             2. Si no lo es, devolver un error 403 (Forbidden)
     
     */
+    const authorization = req.headers.authorization;
+    if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
+    if (authorization.slice(0, 7) !== "Bearer ") return res.status(401).json({ message: "El token no es válido." });
+    else try {
+        const payload = await jwt.verify(authorization, process.env.JWT_SECRET);
+        if (!payload.id || !payload.admin) return res.status(401).json({ message: "El token no es válido." });
+        if (payload.admin === false) return res.status(403).json({ message: "El usuario no es administrador." });
+        else {
+            req.admin = payload.admin;
+            next();
+        }
+    } catch (error) {
+        res.status(401).json({ message: error.message })
+    }
+
 };
