@@ -16,16 +16,17 @@ export const verifyToken = async (req, res, next) => {
     */
     const authorization = req.headers.authorization;
     if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
-    if (authorization.slice(0, 7) !== "Bearer ") return res.status(401).json({ message: "El token no es válido." });
+    else if (!authorization.startsWith("Bearer ")) return res.status(401).json({ message: "El token no es válido." });
     else try {
-        const token = req.headers.authorization.slice(7);
-        const payload = await jwt.verify(token, process.env.JWT_SECRET);
+        const token = authorization.slice(7);
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
         if (!payload.id) return res.status(401).json({ message: "El token no es válido." });
         else {
             req.id = payload.id;
             next();
         }
     } catch (error) {
+        console.error(error);
         res.status(401).json({ message: error.message })
     }
 };
@@ -42,17 +43,17 @@ export const verifyAdmin = async (req, res, next) => {
     */
     const authorization = req.headers.authorization;
     if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
-    if (authorization.slice(0, 7) !== "Bearer ") return res.status(401).json({ message: "El token no es válido." });
-    else try {
-        const payload = await jwt.verify(authorization, process.env.JWT_SECRET);
-        if (!payload.id || !payload.admin) return res.status(401).json({ message: "El token no es válido." });
+    if (authorization.startsWith("Bearer") === false){console.error("adm: malformed"); return res.status(401).json({ message: "El token no es válido." });}
+    try {
+        const payload = jwt.verify(authorization.slice(7), process.env.JWT_SECRET);
+        if (!payload.admin) { console.error("adm: no adm in payload"); return res.status(401).json({ message: "El token no es válido." }) };
         if (payload.admin === false) return res.status(403).json({ message: "El usuario no es administrador." });
         else {
             req.admin = payload.admin;
             next();
         }
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
         res.status(401).json({ message: error.message })
     }
 

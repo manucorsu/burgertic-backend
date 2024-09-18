@@ -71,8 +71,14 @@ const login = async (req, res) => {
   else {
     const matches = await bcrypt.compare(usuario.password, usuarioDb.password);
     if (matches) {
-      const token = jwt.sign({ id: usuarioDb.id }, process.env.JWT_SECRET, { expiresIn: "30m" });
-      return res.status(200).json({ "email": usuario.email, "nombre": usuarioDb.nombre, "apellido": usuarioDb.apellido, "token": token });
+      const token = jwt.sign({ id: usuarioDb.id, admin: usuarioDb.admin }, process.env.JWT_SECRET, { expiresIn: "30m" });
+      return res.status(200).json({
+        nombre: usuarioDb.nombre,
+        apellido: usuarioDb.apellido,
+        email: usuarioDb.email,
+        admin: usuarioDb.admin,
+        token: token
+      });
     }
     else {
       return res.status(400).json({ message: "Usuario o contraseña incorrecta." });
