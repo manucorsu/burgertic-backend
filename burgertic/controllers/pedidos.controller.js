@@ -1,8 +1,9 @@
 import PedidosService from "../services/pedidos.service.js";
+import usuariosService from "../services/usuarios.service.js";
 
 const getPedidos = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener todos los pedidos
@@ -10,30 +11,39 @@ const getPedidos = async (req, res) => {
             3. Devolver un mensaje de error si algo falló (status 500)
         
     */
-    try {
-        const pedidos = await PedidosService.getPedidos();
-        res.status(200).json(pedidos);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const pedidos = await PedidosService.getPedidos();
+    if (pedidos.length === 0) res.status(404).json({ message: "No se encontraron pedidos." });
+    res.status(200).json(pedidos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const getPedidosByUser = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener los pedidos del usuario
-            2. Si el usuario no tiene pedidos, devolver un mensaje de error (status 404)
+            2. Si el usuario no tiene pedidos, devolver una lista vacía (status 200)
             3. Si el usuario tiene pedidos, devolver un json con los pedidos (status 200)
             4. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  try {
+    const pedidos = await PedidosService.getPedidosByUser(req.id);
+    // verifyToken asigna req.id = payload.id
+    res.status(200).json(pedidos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json();
+  }
 };
 
 const getPedidoById = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener el pedido por id (utilizando el id recibido en los parámetros de la request)
@@ -42,11 +52,20 @@ const getPedidoById = async (req, res) => {
             4. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ message: "No se envió un id!" });
+  try {
+    const pedido = await PedidosService.getPedidoById(id);
+    if (!pedido) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
+    res.status(200).json(pedido);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const createPedido = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Verificar que el body de la request tenga el campo platos
@@ -59,11 +78,31 @@ const createPedido = async (req, res) => {
             8. Devolver un mensaje de error si algo falló (status 500)
         
     */
+
+  const pedido = req.body;
+  if (!pedido.platos) return res.status(400).json({ message: "El pedido debe tener platos!" });
+  const platos = pedido.platos;
+  if (Array.isArray(platos) === false || pedido.platos.length < 0)
+    return res.status(400).json({ message: "'platos' debe ser un array de uno o más platos" });
+
+  platos.forEach((p) => {
+    if (!p.id || !p.cantidad) {
+      return res.status(400).json({ message: "'platos' tiene un plato inválido (le falta id y/o cantidad)" });
+    }
+  });
+
+  try {
+    //req.id = payload.id si no falló el middleware verifyToken
+    await PedidosService.createPedido(req.id, platos);
+    res.status(201).json({ message: "Pedido creado con éxito." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const aceptarPedido = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener el pedido por id (utilizando el id recibido en los parámetros de la request)
@@ -78,8 +117,8 @@ const aceptarPedido = async (req, res) => {
 };
 
 const comenzarPedido = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener el pedido por id (utilizando el id recibido en los parámetros de la request)
@@ -94,8 +133,8 @@ const comenzarPedido = async (req, res) => {
 };
 
 const entregarPedido = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener el pedido por id (utilizando el id recibido en los parámetros de la request)
@@ -110,8 +149,8 @@ const entregarPedido = async (req, res) => {
 };
 
 const deletePedido = async (req, res) => {
-    // --------------- COMPLETAR ---------------
-    /*
+  // --------------- COMPLETAR ---------------
+  /*
         Recordar que para cumplir con toda la funcionalidad deben:
 
             1. Utilizar el servicio de pedidos para obtener el pedido por id (utilizando el id recibido en los parámetros de la request)
@@ -124,12 +163,12 @@ const deletePedido = async (req, res) => {
 };
 
 export default {
-    getPedidos,
-    getPedidosByUser,
-    getPedidoById,
-    createPedido,
-    aceptarPedido,
-    comenzarPedido,
-    entregarPedido,
-    deletePedido,
+  getPedidos,
+  getPedidosByUser,
+  getPedidoById,
+  createPedido,
+  aceptarPedido,
+  comenzarPedido,
+  entregarPedido,
+  deletePedido,
 };

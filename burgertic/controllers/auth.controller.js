@@ -25,23 +25,22 @@ const register = async (req, res) => {
     return res.status(400).json({ message: "El usuario tiene datos incompletos." });
   }
   if (usuario.nombre.length > 60 || usuario.apellido.length > 60 || usuario.email.length > 255) {
-    return res.status(400).json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." })
+    return res
+      .status(400)
+      .json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." });
   } // no lo pide la consigna pero notamos que en pgadmin aparece que estos campos son character varying(60/60/255) respectivamente
   if ((await UsuariosService.getUsuarioByEmail(usuario.email)) === null) {
     try {
       const hashedPwd = await bcrypt.hash(usuario.password, 10);
       usuario.password = hashedPwd;
       await UsuariosService.createUsuario(usuario);
-      res.status(201).json({ message: "Usuario registrado con éxito." })
+      res.status(201).json({ message: "Usuario registrado con éxito." });
     } catch (error) {
       console.error(error.message);
-      return res.status(500).json({ message: error.message })
+      return res.status(500).json({ message: error.message });
     }
-  }
-  else {
-    return res.status(400).json({ message: "Ya existe un usuario con ese mail." })
-  }
-}
+  } else return res.status(400).json({ message: "Ya existe un usuario con ese mail." });
+};
 
 const login = async (req, res) => {
   // --------------- COMPLETAR ---------------
@@ -67,20 +66,21 @@ const login = async (req, res) => {
   const usuarioDb = await UsuariosService.getUsuarioByEmail(usuario.email);
   if (usuarioDb === null) {
     return res.status(400).json({ message: "No hay un usuario registrado con ese email." });
-  }
-  else {
+  } else {
     const matches = await bcrypt.compare(usuario.password, usuarioDb.password);
     if (matches) {
-      const token = jwt.sign({ id: usuarioDb.id, admin: usuarioDb.admin }, process.env.JWT_SECRET, { expiresIn: "30m" });
+      const token = jwt.sign({ id: usuarioDb.id, admin: usuarioDb.admin }, process.env.JWT_SECRET, {
+        expiresIn: "30m",
+      });
       return res.status(200).json({
+        id: usuarioDb.id,
         nombre: usuarioDb.nombre,
         apellido: usuarioDb.apellido,
         email: usuarioDb.email,
         admin: usuarioDb.admin,
-        token: token
+        token: token,
       });
-    }
-    else {
+    } else {
       return res.status(400).json({ message: "Usuario o contraseña incorrecta." });
     }
   }

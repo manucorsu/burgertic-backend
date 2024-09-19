@@ -139,6 +139,7 @@ const createPedido = async (idUsuario, platos) => {
         const idPedido = rows[0].id;
 
         for (let plato of platos) {
+            console.log(plato);
             const { rows } = await client.query(
                 "SELECT * FROM platos WHERE id = $1",
                 [plato.id]
