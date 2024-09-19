@@ -3,57 +3,51 @@ import pkg from "pg";
 const { Client } = pkg;
 
 const getUsuarioByEmail = async (email) => {
-    const client = new Client(config);
-    await client.connect();
-    try {
-        const { rows } = await client.query(
-            "SELECT * FROM usuarios WHERE email = $1",
-            [email]
-        );
-        await client.end();
-        if (rows.length < 1) return null;
-        else return rows[0]
-    } catch (error) {
-        await client.end();
-        throw error;
-    }
+  const client = new Client(config);
+  await client.connect();
+  try {
+    const { rows } = await client.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    await client.end();
+    if (rows.length < 1) return null;
+    else return rows[0];
+  } catch (error) {
+    await client.end();
+    throw error;
+  }
 };
 
 const getUsuarioById = async (id) => {
-    const client = new Client(config);
-    await client.connect();
+  const client = new Client(config);
+  await client.connect();
 
-    try {
-        const { rows } = await client.query(
-            "SELECT * FROM usuarios WHERE id = $1",
-            [id]
-        );
-        if (rows.length < 1) return null;
+  try {
+    const { rows } = await client.query("SELECT * FROM usuarios WHERE id = $1", [id]);
+    if (rows.length < 1) return null;
 
-        await client.end();
-        return rows[0];
-    } catch (error) {
-        await client.end();
-        throw error;
-    }
+    await client.end();
+    return rows[0];
+  } catch (error) {
+    await client.end();
+    throw error;
+  }
 };
 
 const createUsuario = async (usuario) => {
-    const client = new Client(config);
-    await client.connect();
+  const client = new Client(config);
+  await client.connect();
 
-    try {
-        const { rows } = await client.query(
-            "INSERT INTO usuarios (nombre, apellido, email, password, admin) VALUES ($1, $2, $3, $4, false)",
-            [usuario.nombre, usuario.apellido, usuario.email, usuario.password]
-        );
+  try {
+    const { rows } = await client.query(
+      "INSERT INTO usuarios (nombre, apellido, email, password, admin) VALUES ($1, $2, $3, $4, false)",
+      [usuario.nombre, usuario.apellido, usuario.email, usuario.password]
+    );
 
-        await client.end();
-        return rows;
-    } catch (error) {
-        await client.end();
-        throw error;
-    }
+    await client.end();
+    return rows;
+  } catch (error) {
+    await client.end();
+    throw error;
+  }
 };
 
 export default { getUsuarioByEmail, getUsuarioById, createUsuario };
