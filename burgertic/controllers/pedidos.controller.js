@@ -114,6 +114,18 @@ const aceptarPedido = async (req, res) => {
             7. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const id = req.params.id;
+
+  const pedido = await PedidosService.getPedidoById(id);
+  if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
+  if (pedido.estado !== "pendiente")
+    res.status(400).json({ message: "Solo se pueden aceptar pedidos marcados como 'pendiente'." });
+  try {
+    await PedidosService.updatePedido(id, "aceptado");
+    res.status(200).json({ message: "El pedido se aceptó con éxito." });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 const comenzarPedido = async (req, res) => {
@@ -130,6 +142,18 @@ const comenzarPedido = async (req, res) => {
             7. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const id = req.params.id;
+
+  const pedido = await PedidosService.getPedidoById(id);
+  if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
+  if (pedido.estado !== "aceptado")
+    res.status(400).json({ message: "Solo se pueden comenzar pedidos aceptados." });
+  try {
+    await PedidosService.updatePedido(id, "en camino");
+    res.status(200).json({ message: "El pedido se aceptó con éxito." });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 const entregarPedido = async (req, res) => {
