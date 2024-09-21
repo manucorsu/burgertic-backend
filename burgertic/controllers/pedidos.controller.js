@@ -1,5 +1,4 @@
 import PedidosService from "../services/pedidos.service.js";
-import usuariosService from "../services/usuarios.service.js";
 
 const getPedidos = async (req, res) => {
   // --------------- COMPLETAR ---------------
@@ -82,8 +81,7 @@ const createPedido = async (req, res) => {
   const pedido = req.body;
   if (!pedido.platos) return res.status(400).json({ message: "El pedido debe tener platos!" });
   const platos = pedido.platos;
-  if (Array.isArray(platos) === false || pedido.platos.length < 0)
-    return res.status(400).json({ message: "'platos' debe ser un array de uno o más platos" });
+  if (Array.isArray(platos) === false || pedido.platos.length < 0) return res.status(400).json({ message: "'platos' debe ser un array de uno o más platos" });
 
   platos.forEach((p) => {
     if (!p.id || !p.cantidad) {
@@ -118,8 +116,7 @@ const aceptarPedido = async (req, res) => {
 
   const pedido = await PedidosService.getPedidoById(id);
   if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
-  if (pedido.estado !== "pendiente")
-    res.status(400).json({ message: "Solo se pueden aceptar pedidos marcados como 'pendiente'." });
+  if (pedido.estado !== "pendiente") res.status(400).json({ message: "Solo se pueden aceptar pedidos marcados como 'pendiente'." });
   try {
     await PedidosService.updatePedido(id, "aceptado");
     res.status(200).json({ message: "El pedido se aceptó con éxito." });
@@ -146,8 +143,7 @@ const comenzarPedido = async (req, res) => {
 
   const pedido = await PedidosService.getPedidoById(id);
   if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
-  if (pedido.estado !== "aceptado")
-    res.status(400).json({ message: "Solo se pueden comenzar pedidos aceptados." });
+  if (pedido.estado !== "aceptado") res.status(400).json({ message: "Solo se pueden comenzar pedidos aceptados." });
   try {
     await PedidosService.updatePedido(id, "en camino");
     res.status(200).json({ message: "El pedido se aceptó con éxito." });
@@ -170,6 +166,16 @@ const entregarPedido = async (req, res) => {
             7. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const id = req.params.id;
+  const pedido = await PedidosService.getPedidoById(id);
+  if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
+  if (pedido.estado !== "en camino") return res.status(400).json({ message: "Solo se pueden entregar pedidos que estén 'en camino'." });
+  try {
+    await PedidosService.updatePedido(id, "entregado");
+    res.status(200).json({ message: "Pedido entregado con éxito." });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 const deletePedido = async (req, res) => {
@@ -184,6 +190,15 @@ const deletePedido = async (req, res) => {
             5. Devolver un mensaje de error si algo falló (status 500)
         
     */
+  const id = req.params.id;
+  const pedido = await PedidosService.getPedidoById(id);
+  if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
+  try{
+    await PedidosService.deletePedido(id);
+    res.status(200).json({message: `El pedido se eliminó con éxito.`});
+  } catch (error){
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 export default {

@@ -21,7 +21,10 @@ export const verifyToken = async (req, res, next) => {
     try {
       const token = authorization.slice(7);
       const payload = jwt.verify(token, process.env.JWT_SECRET);
-      if (!payload.id) return res.status(401).json({ message: "El token no es válido." });
+      if (!payload.id){      
+        console.error("verifyToken: no id");
+        return res.status(401).json({ message: "El token no es válido." });
+      }
       else {
         req.id = payload.id;
         next();
@@ -43,20 +46,21 @@ export const verifyAdmin = async (req, res, next) => {
     */
   const authorization = req.headers.authorization;
   if (!authorization) return res.status(401).json({ message: "No se envió un header de autorización!!" });
-  if (authorization.startsWith("Bearer") === false) {
+  if (authorization.startsWith("Bearer ") === false) {
     console.error("adm: malformed");
     return res.status(401).json({ message: "El token no es válido." });
   }
   try {
     const payload = jwt.verify(authorization.slice(7), process.env.JWT_SECRET);
-    if (!payload.admin) {
-      console.error("adm: no adm in payload");
+    if (!payload.id) {
+      console.error("verifyAdmin: no id");
       return res.status(401).json({ message: "El token no es válido." });
     }
-    if (payload.admin === false) return res.status(403).json({ message: "El usuario no es administrador." });
-    else {
-      req.admin = payload.admin;
-      next();
+    else{
+      const usuario = UsuariosService.getUsuarioById(id);
+      if(usuario === null) return res.status(404).json({message: `No existe un usuario con el id ${id}.`}); //No sé si es posible llegar a este caso si el login anda bien pero bue
+      if(usuario.admin === true) next();
+      else return res.status(403).json({message: "El usuario no cuenta con los privilegios necesarios para realizar esta acción."});
     }
   } catch (error) {
     console.log(error);
