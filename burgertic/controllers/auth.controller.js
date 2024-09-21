@@ -18,16 +18,14 @@ const register = async (req, res) => {
             8. Devolver un mensaje de error si algo falló guardando al usuario (status 500)
     */
   const usuario = req.body;
-  if (!usuario) {
+  if (!usuario || JSON.stringify(usuario) === "{}") {
     return res.status(400).json({ message: "No se envió un usuario." });
   }
   if (!usuario.nombre || !usuario.apellido || !usuario.email || !usuario.password) {
     return res.status(400).json({ message: "El usuario tiene datos incompletos." });
   }
   if (usuario.nombre.length > 60 || usuario.apellido.length > 60 || usuario.email.length > 255) {
-    return res
-      .status(400)
-      .json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." });
+    return res.status(400).json({ message: "El nombre, apellido y/o email del usuario excede el límite de caracteres." });
   } // no lo pide la consigna pero notamos que en pgadmin aparece que estos campos son character varying(60/60/255) respectivamente
   if ((await UsuariosService.getUsuarioByEmail(usuario.email)) === null) {
     try {
@@ -59,7 +57,7 @@ const login = async (req, res) => {
         
     */
   const usuario = req.body;
-  if (!usuario) return res.status(400).json({ message: "No se envió un usuario." });
+  if (!usuario || JSON.stringify(usuario) === "{}") return res.status(400).json({ message: "No se envió un usuario." });
   if (!usuario.email || !usuario.password) {
     return res.status(400).json({ message: "El usuario tiene datos incompletos." });
   }
@@ -69,15 +67,12 @@ const login = async (req, res) => {
   } else {
     const matches = await bcrypt.compare(usuario.password, usuarioDb.password);
     if (matches) {
-      const token = jwt.sign({ id: usuarioDb.id, admin: usuarioDb.admin }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ id: usuarioDb.id }, process.env.JWT_SECRET, {
         expiresIn: "30m",
       });
       return res.status(200).json({
-        id: usuarioDb.id,
-        nombre: usuarioDb.nombre,
-        apellido: usuarioDb.apellido,
         email: usuarioDb.email,
-        admin: usuarioDb.admin,
+        nombreCompleto: `${usuarioDb.nombre} ${usuarioDb.apellido}`,
         token: token,
       });
     } else {
