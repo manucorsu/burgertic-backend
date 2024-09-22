@@ -2,7 +2,7 @@
 *Manuel Corsunsky Gayá y Tomás Ramollino* - 4F
 
 ## IMPORTANTE:
-**No sabíamos si había que entregar el archivo `.env` o no** (el formulario pedía no entregar la carpeta `node_modules`, pero no decía nada del `.env`).
+**No sabíamos si había que entregar el archivo `.env` o no** (el formulario pedía no entregar la carpeta `node_modules`, pero no decía nada del `.env`). Decidimos enviarlo igual.
 
 Este archivo contiene todos los secretos provistos por Neon, **junto con el `JWT_SECRET` utilizado para firmar tokens**. Esto significa que (sacando que reemplacen el .env existente por otro), se usará la base de datos en la cuenta de neon.tech de Manuel. 
 
