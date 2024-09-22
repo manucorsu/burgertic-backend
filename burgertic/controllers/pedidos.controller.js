@@ -76,7 +76,6 @@ const createPedido = async (req, res) => {
             8. Devolver un mensaje de error si algo falló (status 500)
         
     */
-
   const pedido = req.body;
   if (!pedido.platos) return res.status(400).json({ message: "El pedido debe tener platos!" });
   const platos = pedido.platos;
@@ -118,8 +117,8 @@ const aceptarPedido = async (req, res) => {
   const pedido = await PedidosService.getPedidoById(id);
 
   if (pedido === null) return res.status(404).json({ message: `No se encontró un pedido con el id ${id}.` });
-  if (pedido.estado !== "pendiente") return res.status(400).json({ message: "Solo se pueden aceptar pedidos marcados como 'pendiente'." });
-  else try {
+  if (pedido.estado!== "pendiente") return res.status(400).json({ message: "Solo se pueden aceptar pedidos marcados como 'pendiente'." });
+  try {
       await PedidosService.updatePedido(id, "aceptado");
       return res.status(200).json({ message: "El pedido se aceptó con éxito." });
     } catch (error) {
