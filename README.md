@@ -7,3 +7,5 @@
 Este archivo contiene todos los secretos provistos por Neon, **junto con el `JWT_SECRET` utilizado para firmar tokens**. Esto significa que (sacando que reemplacen el .env existente por otro), se usará la base de datos en la cuenta de neon.tech de Manuel. 
 
 Esta base de datos fue reiniciada para que quede tal y como está en  [burgertic.sql](/burgertic/burgertic.sql), con la excepción de que se agregó un usuario administrador para que no tengan que crearlo ustedes. Su email es `admin@burgertic.com.ar` y su contraseña es `admin`.
+
+Todo el trabajo se encuentra dentro de la carpeta [/burgertic](/burgertic/).
